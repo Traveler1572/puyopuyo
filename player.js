@@ -173,4 +173,105 @@ class Player {
         this.movablePuyoElement.style.left = x + 'px';
         this.movablePuyoElement.style.top = y + 'px';
     }
+
+    static falling (isDownPressed) {
+        // 現状の場所の下にブロックがあるかどうか確認する
+        let isBlocked = false;
+        let x = this.puyoStatus.x;
+        let y = this.puyoStatus.y;
+        let dx = this.puyoStatus.dx;
+        let dy = this.puyoStatus.dy;
+        if(y + 1 >= Config.stageRows || Stage.board[y + 1][x] || (y + dy + 1 >= 0 && (y + dy + 1 >= Config.stageRows || Stage.board[y + dy + 1][x + dx]))) {
+            isBlocked = true;
+        }
+        if (!isBlocked) {
+            // 下にブロックがないなら自由落下してよい。プレイヤー操作中の自由落下処理をする
+            this.puyoStatus.top += Config.playerFallingSpeed;
+            if (isDownPressed) {
+                // 下キーが押されているならもっと加速する
+                this.puyoStatus.top += Config.playerDownSpeed;
+            }
+            if (Math.floor(this.puyoStatus.top / Config.puyoImgHeight) !=y) {
+                // ブロックの境を超えたので、再チェックする
+                // 下キーが押されていたら、得点を加算する
+                if (isDownPressed) {
+                    Score.addScore(1);
+                }
+                y += 1;
+                this.puyoStatus.y = y;
+                if(y + 1 >= Config.stageRows || Stage.board[y + 1][x] || (y + dy + 1 >= 0 && (y + dy + 1 >= Config.stageRows || Stage.board[y + dy + 1][x + dx]))) {
+                    isBlocked = true;
+                }
+                if (!isBlocked) {
+                    // 境を超えたが特に問題はなかった。次回も自由落下を続ける
+                    this.groundFrame = 0;
+                    return;
+                } else {
+                    // 境を超えたらブロックにぶつかった。位置を調節して、接地を開始する
+                    this.puyoStatus.top = y * Config.puyoImgHeight;
+                    this.groundFrame = 1;
+                    return;
+                }
+            } else {
+                // 自由落下で特に問題がなかった。次回も自由落下を続ける
+                this.groundFrame = 0;
+                return;
+            }
+        }
+        if (this.groundFrame == 0) {
+            // 初接地である。接地を開始する
+            this.groundFrame = 1;
+            return;
+        } else {
+            this.groundFrame++;
+            if (this.groundFrame > Config.playerGroundFrame) {
+                return true;
+            }
+        }
+
+    }
+    static playing(frame) {
+        // まず自由落下を確認する
+        // 下キーが押されていた場合、それ込みで自由落下させる
+        if (this.falling(this.keyStatus.down)) {
+            // 落下が終わっていたら、ぷよを固定する
+            this.setPuyoPosition();
+            return 'fix';
+        }
+        this.setPuyoPosition();
+        if (this.keyStatus.right || this.keyStatus.left) {
+            // 左右の確認をする
+            const cx = (this.keyStatus.right) ? 1 : -1;
+            const x = this.puyoStatus.x;
+            const y = this.puyoStatus.y;
+            const mx = x + this.puyoStatus.dx;
+            const my = y + this.puyoStatus.dy;
+            // その方向にブロックがないことを確認する
+            // まずは自分の左右を確認
+            let canMove = true;
+            if (y < 0 || x  + cx < 0 || x + cx >= Config.stageCols || Stage.board[y][x + cx]) {
+                if (y >= 0) {
+                    canMove = false;
+                }
+            }
+            if (my < 0 || mx + cx < 0 || mx + cx >= Config.stageCols || Stage.board[my][mx + cx]) {
+                if (my >= 0) {
+                    canMove = false;
+                }
+            }
+            // 接地していない場合は、さらに1個下のブロックの左右も確認する
+            if (this.groundFrame === 0) {
+                if (y + 1 < 0 || x + cx < 0 || x + cx >= Config.stageCols || Stage.board[y + 1][x + cx]) {
+                    if (y + 1 >= 0) {
+                        canMove = false;
+                    }
+                }
+                if (my + 1 < 0 || mx + cx < 0 || mx + cx >= Config.stageCols || Stage.board[my + 1][mx + cx]) {
+                    if (my + 1 >= 0) {
+                        canMove = false;
+                    }
+                }
+            }
+        }
+    }
 }
