@@ -272,6 +272,55 @@ class Player {
                     }
                 }
             }
+
+            if (canMove) {
+                // 動かすことが出来るので、移動先情報をセットして移動状態にする
+                this.actionStartFrame = frame;
+                this.moveSource = x * Config.puyoImgWidth;
+                this.moveDestination = (x + cx) * Config.puyoImgWidth;
+                this.puyoStatus.x += cx;
+                return 'moving';
+            }
+        } else if (this.keyStatus.up) {
+            // 回転を確認する
+            // 回せるかどうかは後で確認。まわすぞ
+            const x = this.puyoStatus.x;
+            const y = this.puyoStatus.y;
+            const mx = x + this.puyoStatus.dx;
+            const my = y + this.puyoStatus.dy;
+            const rotation = this.puyoStatus.rotation;
+            let canRotate = true;
+
+            let cx = 0;
+            let cy = 0;
+            if (rotation === 0) {
+                // 右から上には100% 確実に回せる。何もしない
+            } else if (rotation === 90) {
+                // 上から左に回すときに、左にブロックがあれば右に移動する必要があるのでまず確認する
+                if (y + 1 < 0 || x - 1 < 0 || x - 1 >= Config.stageCols || Stage.board[y + 1][x - 1]) {
+                    if (y + 1 >= 0) {
+                        // ブロックがある。右に1個ずれる
+                        cx = 1;
+                    }
+                }
+                // 右にずれる必要がある時、右にもブロックがあれば回転出来ないので確認する
+                if (cx === 1) {
+                    if (y + 1 < 0 || x + 1 < 0 || y + 1 >= Config.stageRows || x + 1 >= Config.stageCols || Stage.board[y + 1][x + 1]) {
+                        if (y + 1 >= 0) {
+                            // ブロックがある。回転出来なかった
+                            canRotate = false;
+                        }
+                    }
+                }
+            } else if (rotation === 180) {
+                // 左から下に回す時には、自分の下か左下にブロックがあれば1個上に引き上げる。まず下を確認する
+                if (y + 2 < 0 || y + 2 >= Config.stageRows || Stage.board[y + 2][x]) {
+                    if (y + 2 >= 0) {
+                        // ブロックがある。上に引き上げる
+                        cy = -1;
+                    }
+                }
+            }
         }
     }
 }
