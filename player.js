@@ -320,6 +320,30 @@ class Player {
                         cy = -1;
                     }
                 }
+                // 左下も確認する
+                if (y + 2 < 0 || y + 2 >= Config.stageRows || x - 1 < 0 || Stage.board[y + 2][x - 1]) {
+                    if (y + 2 >= 0) {
+                        // ブロックがある。上に引き上げる
+                        cy = -1;
+                    }
+                }
+            } else if (rotation === 270) {
+                // 下から右に回すときは、右にブロックがあれば左に移動する必要があるのでまず確認する
+                if (y + 1 < 0 || x + 1 < 0 || x + 1 >= Config.stageCols || Stage.board[y + 1][x + 1]) {
+                    if (y + 1 >= 0) {
+                        // ブロックがある。左に1個ずれる
+                        cx = -1;
+                    }
+                }
+                // 左にずれる必要がある時、左にもブロックがあれば回転出来ないので確認する
+                if (cx === -1) {
+                    if (y + 1 < 0 || x - 1 < 0 || x - 1 >= Config.stageCols || Stage.board[y + 1][x - 1]) {
+                        if (y + 1 >= 0) {
+                            // ブロックがある。回転出来なかった
+                            canRotate = false;
+                        }
+                    }
+                }
             }
         }
     }
