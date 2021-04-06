@@ -396,4 +396,33 @@ class Player {
         }
         return true;
     }
+
+    static fix() {
+        // 現在のぷよをステージ上に配置する
+        const x = this.puyoStatus.x;
+        const y = this.puyoStatus.y;
+        const dx = this.puyoStatus.dx;
+        const dy = this.puyoStatus.dy;
+        if (y >= 0) {
+            // 画面外のぷよは消してしまう
+            Stage.setPuyo(x, y, this.centerPuyo);
+            Stage.puyoCount++;
+        }
+        if (y + dy >= 0) {
+            // 画面外のぷよは消してしまう
+            Stage.setPuyo(x + dx, y + dy, this.movablePuyo);
+            Stage.puyoCount++;
+        }
+        // 操作用に作成したぷよ画像を消す
+        Stage.stageElement.removeChild(this.centerPuyoElement);
+        Stage.stageElement.removeChild(this.movablePuyoElement);
+        this.centerPuyoElement = null;
+        this.movablePuyoElement = null;
+    }
+
+    static batankyu() {
+        if (this.keyStatus.up) {
+            location.reload()
+        }
+    }
 }
