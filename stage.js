@@ -61,4 +61,55 @@ class Stage {
         }
         this.puyoCount = puyoCount;
     }
+
+    // 画面とメモリ両方にpuyoをセットする
+    static setPuyo(x, y, puyo) {
+        // 画像を作成し配置する
+        const puyoImage = PuyoImage.getPuyo(puyo);
+        puyoImage.style.left = x * Config.puyoImgWidth + "px";
+        puyoImage.style.top = y * Config.puyoImgHeight + "px";
+        this.stageElement.appendChild(puyoImage);
+        // メモリにセットする
+        this.board[y][x] = {
+            puyo: puyo,
+            element: puyoImage
+        }
+    }
+
+    // 自由落下をチェックする
+    static checkFall() {
+        this.fallingPuyoList.length = 0;
+        let isFalling = false;
+        // 下の行から上の行を見ていく
+        for(let y = Config.stageRows - 2; >= 0; y--) {
+            const line = this.board[y];
+            for(let x = 0; x < line.length; x++) {
+                if (!this.board[y][x]) {
+                    // このマスにぷよがなければ次
+                    continue;
+                }
+                if (!this.board[y + 1][x]) {
+                    // このぷよは落ちるので、取り除く
+                    let cell = this.board[y][x];
+                    this.board[y][x] = null;
+                    let dst = y;
+                    while (dst + 1 < Config.stageRows && this.board[dst + 1][x] == null) {
+                        dst++;
+                    }
+                    // 最終目的地に置く
+                    this.board[dst][x] = cell;
+                    // 落ちるリストに入れる
+                    this.fallingPuyoList.push({
+                        element: cell.element,
+                        position: y * Config.puyoImgHeight,
+                        destination: dst * Config.puyoImgHeight,
+                        falling: true
+                    });
+                    // 落ちるものがあったことを記録しておく
+                    isFalling = true;
+                }
+            }
+        }
+        return isFalling;
+    }
 }
