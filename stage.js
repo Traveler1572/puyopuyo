@@ -112,4 +112,31 @@ class Stage {
         }
         return isFalling;
     }
+    // 自由落下させる
+    static fall() {
+        let isFalling = false;
+        for(const fallingPuyo of this.fallingPuyoList) {
+            if (!fallingPuyo.falling) {
+                // すでに自由落下が終わっている
+                continue;
+            }
+            let position = fallingPuyo.position;
+            position += Config.freeFallingSpeed;
+            if (position >= fallingPuyo.destination) {
+                // 自由落下終了
+                position = fallingPuyo.destination;
+                fallingPuyo.falling = false;
+            } else {
+                // まだ落下しているぷよがあることを記録する
+                isFalling = true;
+            }
+            // 新しい位置を保存する
+            fallingPuyo.position = position;
+            // ぷよを動かす
+            fallingPuyo.element.style.top = position + 'px';
+        }
+        return isFalling;
+    }
+
+    
 }
