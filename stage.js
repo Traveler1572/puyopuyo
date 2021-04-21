@@ -184,5 +184,39 @@ class Stage {
             };
         };
         
+        // 実際に削除できるかの確認を行う
+        for(let y = 0; y < Config.stageRows; y++) {
+            for(let x = 0; x < Config.stageCols; x++) {
+                sequencePuyoInfoList.length = 0;
+                const puyoColor = this.board[y][x] && this.board[y][x].puyo;
+                checkSequentialPuyo(x, y);
+                if (sequencePuyoInfoList.length == 0 || sequencePuyoInfoList.length < Config.erasePuyoCount) {
+                    // 連続して並んでいる数が足りなかったので消さない
+                    if (sequencePuyoInfoList.length) {
+                        // 退避していたぷよを消さないリストに追加する
+                        existingPuyoInfoList.push(...sequencePuyoInfoList);
+                    }
+                } else {
+                    // これらは消して良いので消すリストに追加する
+                    this.erasingPuyoInfoList.push(...sequencePuyoInfoList);
+                    erasedPuyoColor[puyoColor] = true;
+                }
+            }
+        }
+        this.puyoCount -= this.erasingPuyoInfoList.length;
+
+        // 消さないリストに入っていたぷよをメモリに復帰させる
+        for(const info of existingPuyoInfoList) {
+            this.board[info.y][info.x] = info.cell;
+        }
+
+        if (this.erasingPuyoInfoList.length) {
+            // もし消せるならば、消えるぷよの個数と色の情報をまとめて返す
+            return {
+                piece: this.erasingPuyoInfoList.length,
+                color: Object.keys(erasedPuyoColor).length
+            };
+        }
+        return null;
     }
 }
