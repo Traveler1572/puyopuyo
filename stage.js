@@ -219,4 +219,41 @@ class Stage {
         }
         return null;
     }
+    // 消すアニメーションをする
+    static erasing(frame) {
+        const elapsedFrame = frame - this.eraseStartFrame;
+        const ratio = elapsedFrame / Config.eraseAnimationDuration;
+        if (ratio > 1) {
+            // アニメーションを終了する
+            for(const info of this.erasingPuyoInfoList) {
+                var element = info.cell.element;
+                this.stageElement.removeChild(element);
+            }
+            return false;
+        } else if(ratio > 0.75) {
+            for(const info of this.erasingPuyoInfoList) {
+                var element = info.cell.element;
+                element.style.display = 'block';
+            }
+            return true;
+        } else if (ratio > 0.50) {
+            for(const info of this.erasingPuyoInfoList) {
+                var element = info.cell.element;
+                element.style.display = 'none';
+            }
+            return true;
+        } else if (ratio > 0.25) {
+            for(const info of this.erasingPuyoInfoList) {
+                var element = info.cell.element;
+                element.style.display = 'block';
+            }
+            return true;
+        } else {
+            for(const info of this.erasingPuyoInfoList) {
+                var element = info.cell.element;
+                element.style.display = 'none';
+            }
+            return true;
+        }
+    }
 }
