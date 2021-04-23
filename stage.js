@@ -256,4 +256,37 @@ class Stage {
             return true;
         }
     }
+
+    static showZenkeshi() {
+        // 全消しを表示する
+        this.zenkeshiImage.style.display = 'block';
+        this.zenkeshiImage.style.opacity = '1';
+        const startTime = Date.now();
+        const startTop = Config.puyoImgHeight * Config.stageRows;
+        const endTop = Config.puyoImgHeight * Config.stageRows / 3;
+        const animation = () => {
+            const ratio = Math.min((Date.now() - startTime) / Config.zenkeshiDuraction, 1);
+            this.zenkeshiImage.style.top = (endTop - startTop) * ratio + startTop + 'px';
+            if (ratio !== 1) {
+                requestAnimationFrame(animation);
+            }
+        };
+        animation();
+    }
+    static hideZenkeshi() {
+        // 全消しを消去する
+        const startTime = Date.now();
+        const animation = () => {
+            const ratio = Math.min((Date.now() - startTime) / Config.zenkeshiDuraction, 1);
+            this.zenkeshiImage.style.opacity = String(1 - ratio);
+            if (ratio !== 1) {
+                requestAnimationFrame(animation);
+            } else {
+                this.zenkeshiImage.style.display = 'none';
+            }
+        };
+        animation();
+    }
 }
+Stage.fallingPuyoList = [];
+Stage.erasingPuyoInfoList = [];
